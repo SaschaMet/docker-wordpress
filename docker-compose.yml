@@ -1,0 +1,52 @@
+version: '3.3'
+services:
+ db:
+  container_name: 'local-wordpress-db'
+  image: 'mysql:5.7'
+  volumes:
+   - './data/mysql:/var/lib/mysql'
+  ports:
+   - 18766:3306
+  environment:
+   MYSQL_ROOT_PASSWORD: somewordpress
+   MYSQL_DATABASE: wordpress_db
+   MYSQL_USER: wordpress_user
+   MYSQL_PASSWORD: wordpress_password
+
+ wordpress:
+  container_name: 'local-wordpress'
+  image: "wordpress:latest"
+  depends_on:
+    - db
+  restart: always
+  ports:
+   - '80:80'
+  links:
+   - db:mysql
+  environment:
+   WORDPRESS_DB_HOST: 'db:3306'
+   WORDPRESS_DB_USER: wordpress_user
+   WORDPRESS_DB_PASSWORD: wordpress_password
+   WORDPRESS_DB_NAME: wordpress_db
+  volumes:
+   - "./data:/data"
+   - "./wordpress:/var/www/html"
+   - "./plugins:/var/www/html/wp-content/plugins"
+   - "./themes:/var/www/html/wp-content/themes"
+   - "./uploads:/var/www/html/wp-content/uploads"
+
+ cli:
+  image: wordpress:cli
+  volumes:
+   - "./data:/data"
+   - "./wordpress:/var/www/html"
+   - "./plugins:/var/www/html/wp-content/plugins"
+   - "./themes:/var/www/html/wp-content/themes"
+   - "./uploads:/var/www/html/wp-content/uploads"
+
+ phpmyadmin:
+  image: phpmyadmin/phpmyadmin
+  depends_on:
+   - db
+  ports:
+   - 22222:80
